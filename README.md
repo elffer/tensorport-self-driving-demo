@@ -73,6 +73,8 @@ mode, let's push it to tensorport to get some real speed up!
 
 ## Run on tensorport
 
+0) Login using `tport login`
+
 1) Clone this repo [if you skipped part 1]
 
 2) From the repo, run:
