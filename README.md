@@ -1,7 +1,9 @@
 # Demo of a self-driving car steering model for Tensorport
 
 This is a demo of a self-steering car model for the tensorport deep learning computation platform.
-
+Supporting blog posts:
+- https://medium.com/towards-data-science/what-i-learnt-building-a-simple-self-steering-car-in-tensorflow-c8d7cab6f6d
+- https://medium.com/@malomarrec/how-to-write-distributed-tensorflow-code-with-an-example-on-tensorport-70bf3306adcb
 
 ## Run locally
 
