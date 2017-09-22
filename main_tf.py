@@ -46,7 +46,7 @@ def main():
     #Path to your data locally. This will enable to run the model both locally and on
     # tensorport without changes
     PATH_TO_LOCAL_LOGS = os.path.expanduser('~/Documents/tensorport-self-driving-demo/logs/')
-    ROOT_PATH_TO_LOCAL_DATA = os.path.expanduser('~/Documents/comma/')
+    ROOT_PATH_TO_LOCAL_DATA = os.path.expanduser('~/Documents/data/comma')
     #end of tport snippet 1
 
 
@@ -172,7 +172,7 @@ def main():
         steering_summary = tf.summary.image("green-is-predicted",render_steering_tf(X,Y,S,predictions)) # Adding numpy operation to graph. Adding image to summary
         loss = get_loss(predictions,Y)
         training_summary = tf.summary.scalar('Training_Loss', loss)#add to tboard
-        
+
         #Batch generators
         gen_train = gen(FLAGS.train_data_dir, time_len=FLAGS.time, batch_size=FLAGS.batch, ignore_goods=FLAGS.nogood)
 
