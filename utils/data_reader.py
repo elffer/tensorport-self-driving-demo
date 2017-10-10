@@ -156,13 +156,34 @@ def gen(data_dir, time_len=1, batch_size=256, ignore_goods=False):
 			X = X[:, -1]
 		yield X, angle, speed
 
+def read_row(data_dir):
+	""" Reads one row of data
+	:param data_dir: Data source path
+	:output: One row of data
+	"""
+	#Reading a batch of 1
+
+	X, angle, speed = datagen(data_dir, time_len=1, batch_size=1, ignore_goods=False).next()
+	angle = angle[:, -1]
+	speed = speed[:, -1]
+	if X.shape[1] == 1:  # no temporal context
+		X = X[:, -1]
+	return [X[0,:].astype(np.float32), angle[0,:], speed[0,:]]
 
 
+
+def read_row_tf(data_dir):
+	def fun():
+		 return read_row(data_dir)
+	return(tf.py_func(fun, [], [tf.float32,tf.float32,tf.float32]))
 
 if __name__ == "__main__":
 	#Testing only
-	DATA_DIR = os.path.expanduser('~/Documents/comma/comma-final/camera/training')
-	print("Running tests")
-	gen_train = gen(DATA_DIR)
-	assert len(gen_train.next()) == 3
-	assert gen_train.next()[2].shape == (256,1)
+	DATA_DIR = os.path.expanduser('~/Documents/data/comma/comma-additional/camera/training/2016-02-08--14-56-28.h5')
+	g = gen(DATA_DIR, time_len=1, batch_size=256, ignore_goods=False)
+	x, y, s = read_row_tf(DATA_DIR)
+
+	with tf.Session() as sess:
+		res = sess.run([x,y,s])
+		print(">>>")
+		print(res)

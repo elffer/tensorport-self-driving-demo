@@ -7,6 +7,12 @@ Runs distributed training of a self-steering car model.
 """
 
 
+
+
+# 1. change utils to remove the generator and just return 1 row, and add a tf.read_row
+# 2. add a py_func read_row_tf, and a
+# 3. add tf.train.batch as an op
+
 import time
 import os
 import logging
@@ -164,10 +170,16 @@ def main():
 
     # Define graph
     with tf.device(device):
-        X = tf.placeholder(tf.float32, [FLAGS.batch, 3, 160, 320], name="X")
-        Y = tf.placeholder(tf.float32,[FLAGS.batch,1], name="Y") # angle only
-        S = tf.placeholder(tf.float32,[FLAGS.batch,1], name="S") #speed
+        # X = tf.placeholder(tf.float32, [FLAGS.batch, 3, 160, 320], name="X")
+        # Y = tf.placeholder(tf.float32,[FLAGS.batch,1], name="Y") # angle only
+        # S = tf.placeholder(tf.float32,[FLAGS.batch,1], name="S") #speed
 
+        x, y, s = read_row_tf(FLAGS.train_data_dir)
+        x.set_shape((3, 160, 320))
+        y.set_shape((1))
+        s.set_shape((1))
+
+        X, Y, S = tf.train.batch([x,y,s], batch_size = FLAGS.batch)
         predictions = get_model(X,FLAGS)
         steering_summary = tf.summary.image("green-is-predicted",render_steering_tf(X,Y,S,predictions)) # Adding numpy operation to graph. Adding image to summary
         loss = get_loss(predictions,Y)
@@ -207,13 +219,13 @@ def main():
             while not sess.should_stop():
                 batch_train = gen_train.next()
 
-                feed_dict = {X: batch_train[0],
-                                Y: batch_train[1],
-                                S: batch_train[2]
-                                }
+                # feed_dict = {X: batch_train[0],
+                #                 Y: batch_train[1],
+                #                 S: batch_train[2]
+                #                 }
 
                 variables = [loss, learning_rate, train_step]
-                current_loss, lr, _ = sess.run(variables, feed_dict)
+                current_loss, lr, _ = sess.run(variables)
 
                 print("Iteration %s - Batch loss: %s" % ((epoch_index)*FLAGS.steps_per_epoch + i,current_loss))
                 i+=1
