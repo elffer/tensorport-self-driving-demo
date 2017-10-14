@@ -174,7 +174,8 @@ def main():
         # Y = tf.placeholder(tf.float32,[FLAGS.batch,1], name="Y") # angle only
         # S = tf.placeholder(tf.float32,[FLAGS.batch,1], name="S") #speed
 
-        x, y, s = read_row_tf(FLAGS.train_data_dir)
+    	reader = DataReader(FLAGS.train_data_dir)
+    	x, y, s = reader.read_row_tf()
         x.set_shape((3, 160, 320))
         y.set_shape((1))
         s.set_shape((1))
@@ -186,8 +187,6 @@ def main():
         training_summary = tf.summary.scalar('Training_Loss', loss)#add to tboard
 
         #Batch generators
-        gen_train = gen(FLAGS.train_data_dir, time_len=FLAGS.time, batch_size=FLAGS.batch, ignore_goods=FLAGS.nogood)
-
         global_step = tf.contrib.framework.get_or_create_global_step()
         learning_rate = tf.train.exponential_decay(FLAGS.starter_lr, global_step,1000, 0.96, staircase=True)
 
@@ -196,7 +195,7 @@ def main():
             .minimize(loss, global_step=global_step)
             )
 
-    def run_train_epoch(target,gen_train,FLAGS,epoch_index):
+    def run_train_epoch(target,FLAGS,epoch_index):
         """Restores the last checkpoint and runs a training epoch
         Inputs:
             - target: device setter for distributed work
@@ -204,7 +203,6 @@ def main():
                 - requires FLAGS.logs_dir from which the model will be restored.
                 Note that whatever most recent checkpoint from that directory will be used.
                 - requires FLAGS.steps_per_epoch
-            - gen_train: training data generator
             - epoch_index: index of current epoch
         """
 
@@ -217,13 +215,6 @@ def main():
         hooks = hooks) as sess:
 
             while not sess.should_stop():
-                batch_train = gen_train.next()
-
-                # feed_dict = {X: batch_train[0],
-                #                 Y: batch_train[1],
-                #                 S: batch_train[2]
-                #                 }
-
                 variables = [loss, learning_rate, train_step]
                 current_loss, lr, _ = sess.run(variables)
 
@@ -231,7 +222,7 @@ def main():
                 i+=1
 
     for e in range(FLAGS.nb_epochs):
-        run_train_epoch(target, gen_train, FLAGS, e)
+        run_train_epoch(target, FLAGS, e)
 
 
 
